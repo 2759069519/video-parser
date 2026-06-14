@@ -102,7 +102,7 @@
 |------|------|
 | Go 1.20+ | 高性能后端语言 |
 | Gin | 轻量级 Web 框架 |
-| GORM | Go ORM 库 |
+| GORM | Go ORM 库（含连接池配置） |
 | PostgreSQL 15 | 关系型数据库 |
 
 ### 前端技术
@@ -163,11 +163,10 @@ export SERVER_PORT=8080         # 服务端口
 #### 4. 启动服务
 
 ```bash
-# 终端 1 - 启动后端
-cd backend
+# 启动后端
 go run cmd/server/main.go
 
-# 终端 2 - 启动前端
+# 启动前端（开发模式）
 cd frontend
 npm install
 npm run dev
@@ -224,7 +223,8 @@ POST /api/fetch-video-url
 Content-Type: application/json
 
 {
-  "video_id": "xxx"
+  "photo_id": "xxx",
+  "platform": "kuaishou"
 }
 ```
 
@@ -235,7 +235,8 @@ POST /api/fetch-atlas-images
 Content-Type: application/json
 
 {
-  "atlas_id": "xxx"
+  "photo_id": "xxx",
+  "platform": "kuaishou"
 }
 ```
 
@@ -347,24 +348,100 @@ export default defineConfig({
 
 ## 🐳 部署建议
 
-### 生产环境
+### 生产环境（systemd + Nginx）
 
-| 步骤 | 说明 |
-|------|------|
-| 1 | 使用 Nginx/Caddy 反向代理 |
-| 2 | 开启 HTTPS |
-| 3 | 配置数据库连接池 |
-| 4 | 使用 PM2 管理 Go 进程 |
-| 5 | 配置日志轮转 |
+#### 1. 构建项目
+
+```bash
+# 构建后端
+go build -o video-parser-server ./cmd/server/main.go
+
+# 构建前端
+cd frontend && npm install && npm run build
+```
+
+#### 2. 创建 systemd 服务
+
+```bash
+# /etc/systemd/system/video-parser.service
+[Unit]
+Description=Video Parser API Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/video-parser
+Environment=DB_HOST=localhost
+Environment=DB_PORT=5432
+Environment=DB_USER=postgres
+Environment=DB_PASSWORD=your_password
+Environment=DB_NAME=video_parser
+Environment=SERVER_PORT=8080
+ExecStart=/opt/video-parser/video-parser-server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# 启用并启动服务
+systemctl daemon-reload
+systemctl enable video-parser
+systemctl start video-parser
+```
+
+#### 3. 配置 Nginx 反向代理
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+#### 4. 配置 HTTPS（Let's Encrypt）
+
+```bash
+# 安装 certbot
+apt install certbot python3-certbot-nginx
+
+# 申请证书并自动配置 Nginx
+certbot --nginx -d your-domain.com --non-interactive --agree-tos --email your@email.com --redirect
+```
 
 ### Docker 部署
 
 ```dockerfile
-# 后端
-FROM golang:1.20-alpine
+# 多阶段构建
+FROM golang:1.20-alpine AS backend
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN go build -o server ./cmd/server
+RUN CGO_ENABLED=0 go build -o server ./cmd/server
+
+FROM node:18-alpine AS frontend
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ .
+RUN npm run build
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=backend /app/server .
+COPY --from=frontend /app/dist ./frontend/dist
 EXPOSE 8080
 CMD ["./server"]
 ```
@@ -402,6 +479,25 @@ A: 部分平台需要更新解析规则，可能是页面结构变化导致。
 ## 📄 许可证
 
 本项目基于 [MIT](LICENSE) 许可证开源。
+
+---
+
+## 📝 更新日志
+
+### 2026-06-14 安全修复
+
+- **[Critical] 修复 SSRF 漏洞** — Download 接口添加 URL 域名校验错误检查
+- **[Critical] 修复 DoS 漏洞** — 所有代理/下载接口添加 `io.LimitReader` 限制响应大小
+- **[Critical] 数据库连接池** — 配置 MaxOpenConns=25, MaxIdleConns=10, ConnMaxLifetime=5min
+- **[Critical] 移除硬编码 Cookie** — 小红书和米游社解析器不再使用伪造的 Cookie
+- **[Critical] 错误日志记录** — `recordParse` 失败时记录日志而非静默忽略
+
+### 2026-06-14 Bug 修复
+
+- **[Bug] 修复抖音播放量字段映射** — 使用 `play_count` 替代错误的 `share_count`
+- **[Bug] 修复 FetchVideoURL/FetchAtlasImages 平台限制** — 添加 `platform` 参数支持多平台
+- **[Fix] 修正 go.mod 版本号** — `go 1.25.0` → `go 1.21`
+- **[Fix] 移除 vite.config.js 内部域名泄露** — 删除 `allowedHosts` 配置
 
 ---
 

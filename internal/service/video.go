@@ -232,10 +232,20 @@ func (s *VideoService) GetParseRecords(limit int) ([]model.ParseRecord, error) {
 	return records, nil
 }
 
-func (s *VideoService) FetchVideoURL(photoID string) (string, error) {
-	return s.kuaishouParser.FetchVideoURL(photoID)
+func (s *VideoService) FetchVideoURL(photoID, platform string) (string, error) {
+	switch platform {
+	case "kuaishou":
+		return s.kuaishouParser.FetchVideoURL(photoID)
+	default:
+		return "", fmt.Errorf("平台 %s 暂不支持获取视频地址", platform)
+	}
 }
 
-func (s *VideoService) FetchAtlasImages(photoID string) ([]parser.Image, error) {
-	return s.kuaishouParser.FetchAtlasImages(photoID)
+func (s *VideoService) FetchAtlasImages(photoID, platform string) ([]parser.Image, error) {
+	switch platform {
+	case "kuaishou":
+		return s.kuaishouParser.FetchAtlasImages(photoID)
+	default:
+		return nil, fmt.Errorf("平台 %s 暂不支持获取图集图片", platform)
+	}
 }

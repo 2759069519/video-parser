@@ -311,7 +311,7 @@ const openPreview = async (photo) => {
     const response = await fetch('/api/fetch-video-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ photo_id: photo.photo_id })
+      body: JSON.stringify({ photo_id: photo.photo_id, platform: 'kuaishou' })
     })
     
     const data = await response.json()
@@ -340,7 +340,7 @@ const openAtlasPreview = async (photo) => {
     const response = await fetch('/api/fetch-atlas-images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ photo_id: photo.photo_id })
+      body: JSON.stringify({ photo_id: photo.photo_id, platform: 'kuaishou' })
     })
     
     const data = await response.json()

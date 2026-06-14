@@ -188,8 +188,10 @@ func (p *DouyinParser) parseVideo(redirectURL string) (*VideoResult, string, err
 		if commentCount, ok := statistics["comment_count"].(float64); ok {
 			result.CommentCount = int64(commentCount)
 		}
-		if shareCount, ok := statistics["share_count"].(float64); ok {
-			result.ViewCount = int64(shareCount)
+		if playCount, ok := statistics["play_count"].(float64); ok {
+			result.ViewCount = int64(playCount)
+		} else if collectCount, ok := statistics["collect_count"].(float64); ok {
+			result.ViewCount = int64(collectCount)
 		}
 	}
 

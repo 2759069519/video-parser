@@ -192,7 +192,8 @@ func (h *VideoHandler) GetRecords(c *gin.Context) {
 }
 
 type FetchVideoURLRequest struct {
-	PhotoID string `json:"photo_id" binding:"required"`
+	PhotoID  string `json:"photo_id" binding:"required"`
+	Platform string `json:"platform" binding:"required"`
 }
 
 func (h *VideoHandler) FetchVideoURL(c *gin.Context) {
@@ -205,7 +206,7 @@ func (h *VideoHandler) FetchVideoURL(c *gin.Context) {
 		return
 	}
 
-	videoURL, err := h.service.FetchVideoURL(req.PhotoID)
+	videoURL, err := h.service.FetchVideoURL(req.PhotoID, req.Platform)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ParseResponse{
 			Success: false,
@@ -223,7 +224,8 @@ func (h *VideoHandler) FetchVideoURL(c *gin.Context) {
 }
 
 type FetchAtlasImagesRequest struct {
-	PhotoID string `json:"photo_id" binding:"required"`
+	PhotoID  string `json:"photo_id" binding:"required"`
+	Platform string `json:"platform" binding:"required"`
 }
 
 func (h *VideoHandler) FetchAtlasImages(c *gin.Context) {
@@ -236,7 +238,7 @@ func (h *VideoHandler) FetchAtlasImages(c *gin.Context) {
 		return
 	}
 
-	images, err := h.service.FetchAtlasImages(req.PhotoID)
+	images, err := h.service.FetchAtlasImages(req.PhotoID, req.Platform)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ParseResponse{
 			Success: false,
