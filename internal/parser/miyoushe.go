@@ -78,7 +78,6 @@ func (p *MiyousheParser) fetchPost(postID string) (*miyoushePostFull, error) {
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9")
 	req.Header.Set("Origin", "https://m.miyoushe.com")
 	req.Header.Set("Referer", "https://m.miyoushe.com/ys?channel=vivo/")
-	req.Header.Set("Cookie", "DEVICEFP=38d7f7c4a5b2f; mi18nLang=zh-cn")
 
 	resp, err := p.client.Do(req)
 	if err != nil {

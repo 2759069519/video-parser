@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"video-parser/internal/model"
 	"video-parser/internal/parser"
 	"video-parser/internal/repository"
@@ -194,7 +195,9 @@ func (s *VideoService) recordParse(url, platform, status, errorMsg string, video
 		AtlasID:   atlasID,
 		ProfileID: profileID,
 	}
-	repository.DB.Create(record)
+	if err := repository.DB.Create(record).Error; err != nil {
+		log.Printf("记录解析日志失败: %v", err)
+	}
 }
 
 func (s *VideoService) GetVideoByID(id uint) (*model.Video, error) {

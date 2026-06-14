@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"time"
 	"video-parser/internal/config"
 	"video-parser/internal/model"
 
@@ -21,6 +22,14 @@ func InitDB(cfg *config.DatabaseConfig) {
 	if err != nil {
 		log.Fatal("数据库连接失败:", err)
 	}
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Fatal("获取数据库实例失败:", err)
+	}
+	sqlDB.SetMaxOpenConns(25)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
 	// 自动迁移
 	if err := DB.AutoMigrate(

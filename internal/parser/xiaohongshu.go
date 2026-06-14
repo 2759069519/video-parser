@@ -150,7 +150,6 @@ func (p *XiaohongshuParser) fetchHTML(pageURL string) (string, error) {
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9")
 	req.Header.Set("Referer", "https://www.xiaohongshu.com/")
-	req.Header.Set("Cookie", "a1=1234567890abcdef; webId=1234567890abcdef;")
 
 	resp, err := p.client.Do(req)
 	if err != nil {

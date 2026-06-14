@@ -299,7 +299,7 @@ func (h *VideoHandler) ProxyImage(c *gin.Context) {
 	c.Header("Content-Type", contentType)
 	c.Header("Cache-Control", "public, max-age=86400")
 
-	io.Copy(c.Writer, resp.Body)
+	io.Copy(c.Writer, io.LimitReader(resp.Body, maxBodySize))
 }
 
 func (h *VideoHandler) Download(c *gin.Context) {
@@ -321,7 +321,14 @@ func (h *VideoHandler) Download(c *gin.Context) {
 		return
 	}
 
-	platform, _ := utils.ResourcePlatform(videoURL)
+	platform, err := utils.ResourcePlatform(videoURL)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ParseResponse{
+			Success: false,
+			Error:   "不支持的资源URL: " + err.Error(),
+		})
+		return
+	}
 	isXhsResource := platform == "xhs"
 
 	if isXhsResource {
@@ -356,7 +363,7 @@ func (h *VideoHandler) Download(c *gin.Context) {
 		}
 		c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
 
-		io.Copy(c.Writer, resp.Body)
+		io.Copy(c.Writer, io.LimitReader(resp.Body, maxBodySize))
 		return
 	}
 
