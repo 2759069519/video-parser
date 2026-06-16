@@ -112,6 +112,14 @@ type doubaoGetPlayInfoResp struct {
 }
 
 func (p *DoubaoParser) ParseURL(rawURL string) (interface{}, string, error) {
+	if strings.Contains(rawURL, "/video-sharing") {
+		vid := p.extractVidFromURL(rawURL)
+		if vid == "" {
+			return nil, "", errors.New("无法从链接提取video_id")
+		}
+		return p.parseVideo(nil, vid)
+	}
+
 	html, err := p.fetchHTML(rawURL)
 	if err != nil {
 		return nil, "", err
@@ -248,10 +256,16 @@ func (p *DoubaoParser) collectImages(creations []doubaoCreation) []Image {
 }
 
 func (p *DoubaoParser) getShareName(data *doubaoPageData) string {
+	if data == nil {
+		return ""
+	}
 	return data.Data.ShareInfo.ShareName
 }
 
 func (p *DoubaoParser) getShareUser(data *doubaoPageData) (string, string) {
+	if data == nil {
+		return "", ""
+	}
 	u := data.Data.ShareInfo.User
 	return u.NickName, u.Image.OriginURL
 }
