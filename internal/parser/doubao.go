@@ -296,6 +296,12 @@ func (p *DoubaoParser) parseVideo(data *doubaoPageData, vid string) (*VideoResul
 	posterURL := videoInfo.Data.PosterURL
 	meta := videoInfo.Data.OriginalMediaInfo.Meta
 	mainURL := videoInfo.Data.OriginalMediaInfo.MainURL
+	backupURL := videoInfo.Data.OriginalMediaInfo.BackupURL
+
+	mainURL = strings.ReplaceAll(mainURL, "&download=true", "")
+	mainURL = strings.TrimSuffix(mainURL, "?download=true")
+	backupURL = strings.ReplaceAll(backupURL, "&download=true", "")
+	backupURL = strings.TrimSuffix(backupURL, "?download=true")
 
 	var width, height int
 	fmt.Sscanf(meta.Width, "%d", &width)
@@ -307,7 +313,7 @@ func (p *DoubaoParser) parseVideo(data *doubaoPageData, vid string) (*VideoResul
 		Title:       p.getShareName(data),
 		Author:      author,
 		VideoURL:    mainURL,
-		DownloadURL: mainURL,
+		DownloadURL: backupURL,
 		CoverURL:    posterURL,
 		Duration:    int(meta.Duration * 1000),
 	}
