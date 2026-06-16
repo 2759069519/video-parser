@@ -37,6 +37,9 @@ func ResourcePlatform(raw string) (string, error) {
 	if matchesHost(host, "miyoushe.com", "mihoyo.com") {
 		return "miyoushe", nil
 	}
+	if matchesHost(host, "doubao.com", "byteimg.com", "douyinpic.com", "douyinvod.com") {
+		return "doubao", nil
+	}
 
 	return "", errors.New("资源域名不在允许列表")
 }

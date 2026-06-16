@@ -15,6 +15,7 @@ type VideoService struct {
 	douyinParser      *parser.DouyinParser
 	xiaohongshuParser *parser.XiaohongshuParser
 	miyousheParser    *parser.MiyousheParser
+	doubaoParser      *parser.DoubaoParser
 }
 
 func NewVideoService() *VideoService {
@@ -23,6 +24,7 @@ func NewVideoService() *VideoService {
 		douyinParser:      parser.NewDouyinParser(),
 		xiaohongshuParser: parser.NewXiaohongshuParser(),
 		miyousheParser:    parser.NewMiyousheParser(),
+		doubaoParser:      parser.NewDoubaoParser(),
 	}
 }
 
@@ -37,6 +39,8 @@ func (s *VideoService) getParserByURL(url string) (parser.Parser, string) {
 		return s.xiaohongshuParser, "xhs"
 	case "miyoushe":
 		return s.miyousheParser, "miyoushe"
+	case "doubao":
+		return s.doubaoParser, "doubao"
 	}
 	return nil, ""
 }

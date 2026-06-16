@@ -87,6 +87,9 @@ func DetectPlatform(rawURL string) string {
 	if host == "miyoushe.com" || strings.HasSuffix(host, ".miyoushe.com") {
 		return "miyoushe"
 	}
+	if host == "doubao.com" || strings.HasSuffix(host, ".doubao.com") {
+		return "doubao"
+	}
 	return ""
 }
 

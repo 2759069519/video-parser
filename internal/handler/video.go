@@ -51,7 +51,7 @@ type ParseResponse struct {
 	Error   string      `json:"error,omitempty"`
 }
 
-var urlRe = regexp.MustCompile(`https?://[^\s]*(?:kuaishou\.com|gifshow\.com|chenzhongtech\.com|kspkg\.com|douyin\.com|iesdouyin\.com|xiaohongshu\.com|xhslink\.com|miyoushe\.com)[^\s]*`)
+var urlRe = regexp.MustCompile(`https?://[^\s]*(?:kuaishou\.com|gifshow\.com|chenzhongtech\.com|kspkg\.com|douyin\.com|iesdouyin\.com|xiaohongshu\.com|xhslink\.com|miyoushe\.com|doubao\.com)[^\s]*`)
 
 func extractURL(input string) string {
 	if urlRe.MatchString(input) {
@@ -276,6 +276,9 @@ func (h *VideoHandler) ProxyImage(c *gin.Context) {
 	if platform == "xhs" {
 		req.Header.Set("Referer", "https://www.xiaohongshu.com/")
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+	} else if platform == "doubao" {
+		req.Header.Set("Referer", "https://www.doubao.com/")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36")
 	} else if platform == "douyin" {
 		req.Header.Set("Referer", "https://www.douyin.com/")
 		req.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)")
@@ -392,6 +395,9 @@ func (h *VideoHandler) Download(c *gin.Context) {
 	case platform == "miyoushe":
 		req.Header.Set("Referer", "https://m.miyoushe.com/")
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36")
+	case platform == "doubao":
+		req.Header.Set("Referer", "https://www.doubao.com/")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36")
 	default:
 		req.Header.Set("Referer", "https://www.douyin.com/")
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
